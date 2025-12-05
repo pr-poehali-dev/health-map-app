@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
+import { Slider } from '@/components/ui/slider';
 import Icon from '@/components/ui/icon';
 import { useToast } from '@/hooks/use-toast';
 
@@ -53,7 +54,6 @@ export default function RatePlace() {
   const [atmosphereRating, setAtmosphereRating] = useState(0);
   const [comment, setComment] = useState('');
   const [photos, setPhotos] = useState<File[]>([]);
-  const [hoveredStar, setHoveredStar] = useState<{ category: string; star: number } | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
 
   const place = {
@@ -98,42 +98,49 @@ export default function RatePlace() {
     }, 2000);
   };
 
-  const StarRating = ({ 
+  const RatingSlider = ({ 
     rating, 
     onRate, 
-    category 
+    color = 'green'
   }: { 
     rating: number; 
-    onRate: (star: number) => void; 
-    category: string;
+    onRate: (value: number) => void; 
+    color?: string;
   }) => {
+    const colorClasses = {
+      green: 'bg-gradient-to-r from-green-500 to-green-600',
+      orange: 'bg-gradient-to-r from-orange-500 to-orange-600',
+      purple: 'bg-gradient-to-r from-purple-500 to-purple-600',
+    };
+
     return (
-      <div className="flex gap-1">
-        {[1, 2, 3, 4, 5].map((star) => {
-          const isHovered = hoveredStar?.category === category && star <= (hoveredStar.star || 0);
-          const isFilled = star <= rating;
-          
-          return (
-            <button
-              key={star}
-              type="button"
-              onClick={() => onRate(star)}
-              onMouseEnter={() => setHoveredStar({ category, star })}
-              onMouseLeave={() => setHoveredStar(null)}
-              className="transition-all duration-200 hover:scale-125 focus:outline-none"
-            >
+      <div className="space-y-3">
+        <Slider
+          value={[rating]}
+          onValueChange={(values) => onRate(values[0])}
+          max={5}
+          step={0.1}
+          className="w-full"
+        />
+        <div className="flex items-center justify-between">
+          <div className="flex gap-1">
+            {[1, 2, 3, 4, 5].map((star) => (
               <Icon
+                key={star}
                 name="Star"
-                size={32}
-                className={`transition-all duration-200 ${
-                  isFilled || isHovered
+                size={20}
+                className={`transition-all ${
+                  star <= Math.round(rating)
                     ? 'text-yellow-500 fill-yellow-500'
                     : 'text-gray-300'
                 }`}
               />
-            </button>
-          );
-        })}
+            ))}
+          </div>
+          <div className={`text-2xl font-bold bg-clip-text text-transparent ${colorClasses[color as keyof typeof colorClasses]}`}>
+            {rating.toFixed(1)}
+          </div>
+        </div>
       </div>
     );
   };
@@ -220,56 +227,49 @@ export default function RatePlace() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <label className="text-sm font-medium">Общая оценка *</label>
-                <div className="flex items-center gap-4">
-                  <StarRating
-                    rating={overallRating}
-                    onRate={setOverallRating}
-                    category="overall"
-                  />
-                  {overallRating > 0 && (
-                    <span className="text-2xl font-bold bg-gradient-to-r from-green-600 to-orange-600 bg-clip-text text-transparent animate-scale-in">
-                      {overallRating}.0
-                    </span>
-                  )}
-                </div>
+                <RatingSlider
+                  rating={overallRating}
+                  onRate={setOverallRating}
+                  color="green"
+                />
               </div>
 
-              <div className="grid sm:grid-cols-3 gap-6 pt-4 border-t">
-                <div className="space-y-2">
+              <div className="space-y-6 pt-4 border-t">
+                <div className="space-y-3">
                   <label className="text-sm font-medium flex items-center gap-2">
                     <Icon name="Sparkles" size={16} className="text-green-600" />
                     Качество
                   </label>
-                  <StarRating
+                  <RatingSlider
                     rating={qualityRating}
                     onRate={setQualityRating}
-                    category="quality"
+                    color="green"
                   />
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-3">
                   <label className="text-sm font-medium flex items-center gap-2">
                     <Icon name="Users" size={16} className="text-orange-600" />
                     Сервис
                   </label>
-                  <StarRating
+                  <RatingSlider
                     rating={serviceRating}
                     onRate={setServiceRating}
-                    category="service"
+                    color="orange"
                   />
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-3">
                   <label className="text-sm font-medium flex items-center gap-2">
                     <Icon name="Coffee" size={16} className="text-purple-600" />
                     Атмосфера
                   </label>
-                  <StarRating
+                  <RatingSlider
                     rating={atmosphereRating}
                     onRate={setAtmosphereRating}
-                    category="atmosphere"
+                    color="purple"
                   />
                 </div>
               </div>

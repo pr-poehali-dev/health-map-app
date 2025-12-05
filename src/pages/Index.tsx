@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -57,6 +58,7 @@ const categoryConfig = {
 };
 
 export default function Index() {
+  const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState<Category | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [showProfile, setShowProfile] = useState(false);
@@ -221,7 +223,12 @@ export default function Index() {
                                     <Icon name="MessageSquare" size={14} />
                                     <span>{location.reviews} отзывов</span>
                                   </div>
-                                  <Button size="sm" variant="ghost" className="ml-auto gap-1">
+                                  <Button 
+                                    size="sm" 
+                                    variant="ghost" 
+                                    className="ml-auto gap-1"
+                                    onClick={() => navigate(`/rate/${location.id}`)}
+                                  >
                                     <Icon name="Plus" size={16} />
                                     Оценить
                                   </Button>
